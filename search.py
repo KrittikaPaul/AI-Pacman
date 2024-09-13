@@ -87,11 +87,62 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
+    
+    frontier = util.Stack()
+    explored = []
+    print "Start:", problem.getStartState()
+    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    # frontier is the stack which stores an array of items
+    # each item is a state and the actions taken to reach that state
+    frontier.push((problem.getStartState(), []))
+    explored.append(problem.getStartState())
+    while not frontier.isEmpty():
+        current_state, actions = frontier.pop()
+        # print "current state", current_state
+        # print "actions", actions
+        successors = problem.getSuccessors(current_state)
+        for successor in successors:
+            s_state = successor[0];
+            s_direction = successor[1];
+            if s_state not in explored:
+                if problem.isGoalState(s_state):
+                    actions = actions + [s_direction]
+                    return actions
+                else:
+                    frontier.push((s_state, actions + [s_direction]))
+                    explored.append(s_state)
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    frontier = util.Queue()
+    explored = []
+    print "Start:", problem.getStartState()
+    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
+    print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    # frontier is the stack which stores an array of items
+    # each item is a state and the actions taken to reach that state
+    frontier.push((problem.getStartState(), []))
+    explored.append(problem.getStartState())
+    while not frontier.isEmpty():
+        current_state, actions = frontier.pop()
+        # print "current state", current_state
+        # print "actions", actions
+        successors = problem.getSuccessors(current_state)
+        for successor in successors:
+            s_state = successor[0];
+            s_direction = successor[1];
+            if s_state not in explored:
+                if problem.isGoalState(s_state):
+                    actions = actions + [s_direction]
+                    return actions
+                else:
+                    frontier.push((s_state, actions + [s_direction]))
+                    explored.append(s_state)
+
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
