@@ -123,14 +123,10 @@ def breadthFirstSearch(problem):
     print "Start:", problem.getStartState()
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    # frontier is the stack which stores an array of items
-    # each item is a state and the actions taken to reach that state
     frontier.push((problem.getStartState(), []))
     explored.append(problem.getStartState())
     while not frontier.isEmpty():
         current_state, actions = frontier.pop()
-        # print "current state", current_state
-        # print "actions", actions
         successors = problem.getSuccessors(current_state)
         for successor in successors:
             s_state = successor[0];
@@ -148,7 +144,37 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+    
+    frontier = util.PriorityQueue()
+    frontier.push((problem.getStartState(), [], 0), 0)  # frontier = ((state, actions, cost), priority)
+    explored = {}
+
+    while not frontier.isEmpty():
+        current_state, actions, current_cost = frontier.pop()
+
+        if current_state in explored and explored[current_state] <= current_cost:
+            continue
+        else:
+            # Otherwise, record this state as explored with the current cost
+            explored[current_state] = current_cost
+
+            # Check if we've reached the goal state
+            if problem.isGoalState(current_state):
+                return actions  # Return the sequence of actions to reach the goal
+
+            # Get the successors (neighbors) of the current state
+            for successor, action, step_cost in problem.getSuccessors(current_state):
+                # Compute the new cost to reach this successor
+                new_cost = current_cost + step_cost
+
+                # If this successor hasn't been explored or we found a cheaper path to it, push it to the frontier
+                if successor not in explored or explored[successor] > new_cost:
+                    frontier.push((successor, actions + [action], new_cost), new_cost)
+
+    return []  # If no solution is found, return an empty list
+
     util.raiseNotDefined()
+
 
 def nullHeuristic(state, problem=None):
     """
@@ -160,6 +186,38 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    frontier = util.PriorityQueue()
+    start_state = problem.getStartState()
+    frontier.push((start_state, [], 0), 0 + heuristic(start_state, problem))
+    explored = {}
+
+    while not frontier.isEmpty():
+        # Pop the state with the lowest priority (f(n) = g(n) + h(n))
+        current_state, actions, current_cost = frontier.pop()
+
+        # If the state has been explored with a lower or equal cost, skip it
+        if current_state in explored and explored[current_state] <= current_cost:
+            continue
+        else:
+            # Otherwise, mark it as explored with the current cost
+            explored[current_state] = current_cost
+
+            # Check if we have reached the goal state
+            if problem.isGoalState(current_state):
+                return actions  # Return the sequence of actions to reach the goal
+
+            # Get the successors (neighbors) of the current state
+            for successor, action, step_cost in problem.getSuccessors(current_state):
+                # Compute the new cost to reach this successor (f(n) = g(n) + h(n))
+                new_cost = current_cost + step_cost + heuristic(successor, problem)
+                priority = new_cost
+
+                # If the successor hasn't been explored or we found a cheaper path to it, push it to the frontier
+                if successor not in explored or explored[successor] > new_cost:
+                    frontier.push((successor, actions + [action], new_cost), priority)
+
+    return []  
+    
     util.raiseNotDefined()
 
 
