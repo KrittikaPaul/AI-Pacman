@@ -120,9 +120,6 @@ def breadthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     frontier = util.Queue()
     explored = []
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
     frontier.push((problem.getStartState(), []))
     explored.append(problem.getStartState())
     while not frontier.isEmpty():
@@ -144,34 +141,48 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    
     frontier = util.PriorityQueue()
-    frontier.push((problem.getStartState(), [], 0), 0)  # frontier = ((state, actions, cost), priority)
-    explored = {}
-
+    explored = []
+    frontier.push((problem.getStartState(), [], 0), 0)
+    # explored.append(problem.getStartState())
     while not frontier.isEmpty():
         current_state, actions, current_cost = frontier.pop()
+        if problem.isGoalState(current_state):
+            return actions
+        if current_state not in explored:
+            explored.append(current_state)
+            successors = problem.getSuccessors(current_state)
+            for successor in successors:
+                s_state = successor[0];
+                s_direction = successor[1];
+                if s_state not in explored:
+                    f_actions = actions + [s_direction]
+                    cost = problem.getCostOfActions(f_actions)
+                    frontier.push((s_state, f_actions, 0), cost)
+    
+    # frontier = util.PriorityQueue()
+    # frontier.push((problem.getStartState(), [], 0), 0)  # frontier = ((state, actions, cost), priority)
+    # explored = {} # dictionary to store cost of the shortest path to reach that node
+    # print "Successor: ", problem.getSuccessors(problem.getStartState())
 
-        if current_state in explored and explored[current_state] <= current_cost:
-            continue
-        else:
-            # Otherwise, record this state as explored with the current cost
-            explored[current_state] = current_cost
+    # while not frontier.isEmpty():
+    #     current_state, actions, current_cost = frontier.pop()
 
-            # Check if we've reached the goal state
-            if problem.isGoalState(current_state):
-                return actions  # Return the sequence of actions to reach the goal
+    #     if current_state in explored and explored[current_state] <= current_cost:
+    #         continue
+    #     else:
+    #         if problem.isGoalState(current_state):
+    #             return actions 
 
-            # Get the successors (neighbors) of the current state
-            for successor, action, step_cost in problem.getSuccessors(current_state):
-                # Compute the new cost to reach this successor
-                new_cost = current_cost + step_cost
+    #         explored[current_state] = current_cost
 
-                # If this successor hasn't been explored or we found a cheaper path to it, push it to the frontier
-                if successor not in explored or explored[successor] > new_cost:
-                    frontier.push((successor, actions + [action], new_cost), new_cost)
+    #         for successor, action, step_cost in problem.getSuccessors(current_state):
+    #             new_cost = current_cost + step_cost
 
-    return []  # If no solution is found, return an empty list
+    #             if successor not in explored or explored[successor] > new_cost:
+    #                 frontier.push((successor, actions + [action], new_cost), new_cost)
+
+    # return []
 
     util.raiseNotDefined()
 
@@ -186,37 +197,85 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+    # frontier = util.PriorityQueue()
+    # start_state = problem.getStartState()
+    # frontier.push((start_state, [], 0), 0 + heuristic(start_state, problem))
+    # explored = {} 
+
+    # while not frontier.isEmpty():
+    #     current_state, actions, current_cost = frontier.pop()
+
+    #     if current_state in explored and explored[current_state] <= current_cost:
+    #         continue
+    #     else:
+    #         if problem.isGoalState(current_state):
+    #             return actions 
+
+    #         explored[current_state] = current_cost
+            
+    #         for successor, action, step_cost in problem.getSuccessors(current_state):
+    #             # Compute (f(n) = g(n) + h(n))
+    #             new_cost = current_cost + step_cost + heuristic(successor, problem)
+
+    #             if successor not in explored or explored[successor] > new_cost:
+    #                 frontier.push((successor, actions + [action], new_cost), new_cost)
+
+    # return []  
+
+ ##################################################################################################
+
+    # def _update(Frontier, item, priority):
+    #     for index, (p, c, i) in enumerate(Frontier.heap):
+    #         if i[0] == item[0]:
+    #             if p <= priority:
+    #                 break
+    #             del Frontier.heap[index]
+    #             Frontier.heap.append((priority, c, item))
+    #             heapq.heapify(Frontier.heap)
+    #             break
+    #     else:
+    #         Frontier.push(item, priority)
+
+    # Frontier = util.PriorityQueue()
+    # Visited = []
+    # Frontier.push( (problem.getStartState(), []), heuristic(problem.getStartState(), problem) )
+    # Visited.append( problem.getStartState() )
+
+    # while Frontier.isEmpty() == 0:
+    #     state, actions = Frontier.pop()
+    #     #print state
+    #     if problem.isGoalState(state):
+    #         #print 'Find Goal'
+    #         return actions
+
+    #     if state not in Visited:
+    #         Visited.append( state )
+
+    #     for next in problem.getSuccessors(state):
+    #         n_state = next[0]
+    #         n_direction = next[1]
+    #         if n_state not in Visited:
+    #             _update( Frontier, (n_state, actions + [n_direction]), \
+    #                 problem.getCostOfActions(actions+[n_direction])+heuristic(n_state, problem) )
+
     frontier = util.PriorityQueue()
-    start_state = problem.getStartState()
-    frontier.push((start_state, [], 0), 0 + heuristic(start_state, problem))
-    explored = {}
-
+    explored = []
+    frontier.push((problem.getStartState(), [], 0), heuristic(problem.getStartState(), problem))
+    # explored.append(problem.getStartState())
     while not frontier.isEmpty():
-        # Pop the state with the lowest priority (f(n) = g(n) + h(n))
         current_state, actions, current_cost = frontier.pop()
-
-        # If the state has been explored with a lower or equal cost, skip it
-        if current_state in explored and explored[current_state] <= current_cost:
-            continue
-        else:
-            # Otherwise, mark it as explored with the current cost
-            explored[current_state] = current_cost
-
-            # Check if we have reached the goal state
-            if problem.isGoalState(current_state):
-                return actions  # Return the sequence of actions to reach the goal
-
-            # Get the successors (neighbors) of the current state
-            for successor, action, step_cost in problem.getSuccessors(current_state):
-                # Compute the new cost to reach this successor (f(n) = g(n) + h(n))
-                new_cost = current_cost + step_cost + heuristic(successor, problem)
-                priority = new_cost
-
-                # If the successor hasn't been explored or we found a cheaper path to it, push it to the frontier
-                if successor not in explored or explored[successor] > new_cost:
-                    frontier.push((successor, actions + [action], new_cost), priority)
-
-    return []  
+        if problem.isGoalState(current_state):
+            return actions
+        if current_state not in explored:
+            explored.append(current_state)
+            successors = problem.getSuccessors(current_state)
+            for successor in successors:
+                s_state = successor[0];
+                s_direction = successor[1];
+                if s_state not in explored:
+                    f_actions = actions + [s_direction]
+                    cost = problem.getCostOfActions(f_actions)
+                    frontier.push((s_state, f_actions, 0), cost + heuristic(s_state, problem))
     
     util.raiseNotDefined()
 
